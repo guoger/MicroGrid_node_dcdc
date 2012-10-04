@@ -57,7 +57,13 @@
 #define REST_RES_BATTERY 0
 #define REST_RES_RADIO 1
 
-
+/* Configuration of microgrid node specific resources */
+#define REST_RES_DCDC_HELLO 1
+#define REST_RES_DCDC_INPUT_VOLTAGE 1
+#define REST_RES_DCDC_OUTPUT_VOLTAGE 1
+#define REST_RES_DCDC_INPUT_CURRENT 1
+#define REST_RES_DCDC_OUTPUT_CURRENT 1
+#define REST_RES_DCDC_MODE 1
 
 #if !UIP_CONF_IPV6_RPL && !defined (CONTIKI_TARGET_MINIMAL_NET) && !defined (CONTIKI_TARGET_NATIVE)
 #warning "Compiling with static routing!"
@@ -106,6 +112,127 @@
 #define PRINT6ADDR(addr)
 #define PRINTLLADDR(addr)
 #endif
+
+/******************************************************************************/
+//DC-DC controller resources
+#if REST_RES_DCDC_HELLO
+
+/**
+ * Hello world resource
+ */
+RESOURCE(dcdchello, METHOD_GET, "dcdc/hello", "title=\"DC_DC Helloworld: ?len=0..\";rt=\"Text\"");
+
+/**
+ * Hello world resource handler
+ */
+void
+dcdchello_handler(void* request, void* response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  const char *len = NULL;
+  char const * const message = "DC-DC converter saying hello";
+  int length = strlen(message);
+  memcpy(buffer, message, length);
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_header_etag(response, (uint8_t *) &length, 1);
+  REST.set_response_payload(response, buffer, length);
+}
+#endif
+
+#if REST_RES_DCDC_INPUT_CURRENT
+RESOURCE(dcdcInputCurrent, METHOD_GET, "dcdc/inputCurrent", "title=\"Input current: ?len=0..\";rt=\"Text\"");
+
+void
+dcdcInputCurrent_handler(void* request, void* response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  const char *dummy = NULL;
+  char const * const messageDefault = "notdetermined";
+  int length;
+  if (REST.get_query_variable(request, "dummy", &dummy)) {
+     length = strlen(dummy);
+     if (length>REST_MAX_CHUNK_SIZE) length = REST_MAX_CHUNK_SIZE;
+     memcpy(buffer, dummy, length);
+   } else {
+     length = strlen(messageDefault);
+     memcpy(buffer, messageDefault, length);
+   }
+
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_header_etag(response, (uint8_t *) &length, 1);
+  REST.set_response_payload(response, buffer, length);
+}
+#endif
+
+#if REST_RES_DCDC_INPUT_VOLTAGE
+RESOURCE(dcdcInputVoltage, METHOD_GET, "dcdc/inputVoltage", "title=\"Input current: ?len=0..\";rt=\"Text\"");
+
+void
+dcdcInputVoltage_handler(void* request, void* response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  const char *dummy = NULL;
+  char const * const messageDefault = "notdetermined";
+  int length;
+  if (REST.get_query_variable(request, "dummy", &dummy)) {
+     length = strlen(dummy);
+     if (length>REST_MAX_CHUNK_SIZE) length = REST_MAX_CHUNK_SIZE;
+     memcpy(buffer, dummy, length);
+   } else {
+     length = strlen(messageDefault);
+     memcpy(buffer, messageDefault, length);
+   }
+
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_header_etag(response, (uint8_t *) &length, 1);
+  REST.set_response_payload(response, buffer, length);
+}
+#endif
+
+#if REST_RES_DCDC_OUTPUT_CURRENT
+RESOURCE(dcdcOutputCurrent, METHOD_GET, "dcdc/outputCurrent", "title=\"Input current: ?len=0..\";rt=\"Text\"");
+
+void
+dcdcOutputCurrent_handler(void* request, void* response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  const char *dummy = NULL;
+  char const * const messageDefault = "notdetermined";
+  int length;
+  if (REST.get_query_variable(request, "dummy", &dummy)) {
+     length = strlen(dummy);
+     if (length>REST_MAX_CHUNK_SIZE) length = REST_MAX_CHUNK_SIZE;
+     memcpy(buffer, dummy, length);
+   } else {
+     length = strlen(messageDefault);
+     memcpy(buffer, messageDefault, length);
+   }
+
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_header_etag(response, (uint8_t *) &length, 1);
+  REST.set_response_payload(response, buffer, length);
+}
+#endif
+
+#if REST_RES_DCDC_OUTPUT_VOLTAGE
+RESOURCE(dcdcOutputVoltage, METHOD_GET, "dcdc/outputVoltage", "title=\"Input current: ?len=0..\";rt=\"Text\"");
+
+dcdcOutputVoltage_handler(void* request, void* response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  const char *dummy = NULL;
+  char const * const messageDefault = "notdetermined";
+  int length;
+  if (REST.get_query_variable(request, "dummy", &dummy)) {
+     length = strlen(dummy);
+     if (length>REST_MAX_CHUNK_SIZE) length = REST_MAX_CHUNK_SIZE;
+     memcpy(buffer, dummy, length);
+   } else {
+     length = strlen(messageDefault);
+     memcpy(buffer, messageDefault, length);
+   }
+
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN); /* text/plain is the default, hence this option could be omitted. */
+  REST.set_header_etag(response, (uint8_t *) &length, 1);
+  REST.set_response_payload(response, buffer, length);
+}
+#endif
+
 
 /******************************************************************************/
 #if REST_RES_HELLO
@@ -799,6 +926,23 @@ PROCESS_THREAD(rest_server_example, ev, data)
 
   /* Initialize the REST engine. */
   rest_init_engine();
+
+  /* Activate the microgridnode-specific resources. */
+#if REST_RES_DCDC_HELLO
+  rest_activate_resource(&resource_dcdchello);
+#endif
+#if REST_RES_DCDC_INPUT_CURRENT
+  rest_activate_resource(&resource_dcdcInputCurrent);
+#endif
+#if REST_RES_DCDC_INPUT_VOLTAGE
+  rest_activate_resource(&resource_dcdcInputVoltage);
+#endif
+#if REST_RES_DCDC_OUTPUT_CURRENT
+  rest_activate_resource(&resource_dcdcOutputCurrent);
+#endif
+#if REST_RES_DCDC_OUTPUT_VOLTAGE
+  rest_activate_resource(&resource_dcdcOutputVoltage);
+#endif
 
   /* Activate the application-specific resources. */
 #if REST_RES_HELLO
