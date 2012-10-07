@@ -1,0 +1,8 @@
+Place the contents of this folder into /contiki/examples/microgridNode
+If you have it in another place, edit the server-only.csc appropriately.
+
+
+User server-only.scs simulations since this one includes both CoAP server and Client.
+
+Follow the original README of eribium to launch simualtions
+

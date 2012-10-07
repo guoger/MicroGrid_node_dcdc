@@ -13,3 +13,6 @@
 /obj_cooja
 /COOJA.log
 /.project
+*.d
+*.map
+*.sky
