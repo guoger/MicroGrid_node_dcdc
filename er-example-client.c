@@ -73,7 +73,7 @@
 #endif
 
 /* TODO: This server address is hard-coded for Cooja. */
-#define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xaaaa, 0, 0, 0, 0x0212, 0x7402, 0x0002, 0x0202) /* cooja2 */
+#define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0x0001) /* cooja2 */
 
 #define LOCAL_PORT      UIP_HTONS(COAP_DEFAULT_PORT+1)
 #define REMOTE_PORT     UIP_HTONS(COAP_DEFAULT_PORT)
@@ -127,13 +127,20 @@ PROCESS_THREAD(coap_client_example, ev, data)
     PROCESS_YIELD();
 
     if (etimer_expired(&et)) {
-      printf("--Toggle assd timer--\n");
+      printf("--Toggle timer--\n");
 
       /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
       coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0 );
       coap_set_header_uri_path(request, service_urls[1]);
 
-      const char msg[] = "Toggle!";
+      /* Set Proxy URI*/
+      coap_set_header_proxy_uri(request, "http://zzzz/mgserver");
+      
+      /* Set Content type to JSON*/
+      coap_set_header_content_type(request, REST.type.APPLICATION_JSON);
+      
+      /* Set Payload content as a JSON string*/
+      const char msg[] = "{\"ip\":\"aaaa::7403:3:303\",\"sernum\":\"dcdcnode1\"}";
       coap_set_payload(request, (uint8_t *)msg, sizeof(msg)-1);
 
 
